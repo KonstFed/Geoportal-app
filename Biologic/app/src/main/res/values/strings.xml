@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Biologic</string>
+    <string name="urlstruct">http://biodiv.isc.irk.ru/dataset/list?f=100&amp;iDisplayStart=0&amp;iDisplayLength=100&amp;s_fields=JSON&amp;f_id=2206</string>
+    <string name="noInternet">Отсутствует интернет подключение</string>
+</resources>
