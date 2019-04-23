@@ -1,10 +1,12 @@
 package com.example.biologic;
 
+import android.content.Context;
 import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Switch;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -17,15 +19,15 @@ import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 
-public class ConnectServ extends AsyncTask<String,String,String> {
+public class ConnectServ extends AsyncTask<String,Integer,String> {
     String command,URLserv;
-    public ConnectServ(String command,String URLserv) {
+    MainActivity mainform;
+    public ConnectServ(String command,MainActivity mainform) {
         this.command = command;
-        this.URLserv = URLserv;
+        this.mainform = mainform;
     }
 
-
-    private String getStruct()
+    private String getStruct(String URLserv)
     {
         HttpURLConnection urlConnection = null;
         String serviceUrl = URLserv;
@@ -68,7 +70,7 @@ public class ConnectServ extends AsyncTask<String,String,String> {
         switch (command)
         {
             case "structure":
-                return getStruct();
+                return getStruct(strings[0]);
 
             default:
                 return "";
@@ -82,6 +84,16 @@ public class ConnectServ extends AsyncTask<String,String,String> {
             case "structure":
                 try {
                     JSONObject struct = new JSONObject(s);
+                    JSONArray aadata = struct.getJSONArray("aaData");
+                    if (aadata.length()==1)
+                    {
+                        JSONObject tmp = aadata.getJSONObject(0);
+                        String tabledesc = tmp.getString("JSON");
+                        JSONObject struct2 = new JSONObject(tabledesc);
+                        mainform.drawform(struct2);
+                    }
+
+
                 } catch (JSONException e) {
                     Log.d("serverResponce", "struct dnt parse");
 

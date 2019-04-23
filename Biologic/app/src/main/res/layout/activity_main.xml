@@ -2,6 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mainactivity"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
@@ -11,7 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:id="@+id/logo"
-        android:src="@drawable/testlenin"
+        android:src="@drawable/testlogoussr"
         android:layout_centerHorizontal="true"
     />
 
@@ -19,15 +20,22 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/testtext2"
-        android:text="Ульянов Р.С.Ф.Р.С.Р."
+        android:text="Ульянов В.И."
         android:layout_toRightOf="@id/logo"
-        />
+    />
     <Button
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:id="@+id/exitbutton"
-    android:layout_toRightOf="@id/testtext2"
-    android:text="Выйти"/>
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/exitbutton"
+        android:layout_toRightOf="@id/testtext2"
+        android:text="Выйти"
+    />
+    <TextView
+        android:id="@+id/ssa"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/logo"
+        />
 
 
 </RelativeLayout>
