@@ -5,16 +5,18 @@
     android:id="@+id/mainactivity"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:gravity="left"
     tools:context=".MainActivity">
 
     <ImageView
+        android:id="@+id/logo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:id="@+id/logo"
-        android:src="@drawable/testlogoussr"
         android:layout_centerHorizontal="true"
-    />
+        android:scaleX="0.5"
+        android:scaleY="0.5"
+        android:src="@drawable/testlogoussr" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -30,12 +32,32 @@
         android:layout_toRightOf="@id/testtext2"
         android:text="Выйти"
     />
-    <TextView
-        android:id="@+id/ssa"
-        android:layout_width="wrap_content"
+    <Spinner
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/logo"
-        />
+        android:id="@+id/tables"></Spinner>
+    <Button
+    android:id="@+id/newNote"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_below="@+id/tables"
+    android:textSize="32dp"
+    android:text="+"/>
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/newNote"
+        android:layout_below="@id/tables"
+        android:textSize="32dp"
+        android:text="перезагрузить"/>
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/notes"
+        android:layout_below="@+id/newNote"
+        >
+    </ListView>
 
 
 </RelativeLayout>
