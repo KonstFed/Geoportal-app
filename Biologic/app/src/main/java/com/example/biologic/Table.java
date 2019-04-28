@@ -3,16 +3,17 @@ package com.example.biologic;
 import java.util.ArrayList;
 
 public class Table {
-    String name;
+    String nameTable;
     ArrayList<String> struct;
-
-    public Table(String name, ArrayList<String> struct) {
-        this.name = name;
+    ArrayList<Note> notes;
+    public Table(String name, ArrayList<String> struct,ArrayList<Note> notes) {
+        this.nameTable = name;
         this.struct = struct;
+        this.notes = notes;
     }
 
     @Override
     public String toString() {
-        return name;
+        return nameTable;
     }
 }

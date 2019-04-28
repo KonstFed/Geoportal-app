@@ -27,6 +27,8 @@ public class MainActivity extends AppCompatActivity {
     private String url;
     private ImageView logo;
     private boolean isRegged;
+    private ArrayList<Table> tables = new ArrayList<Table>();
+
     RelativeLayout mainLayer;
     @SuppressLint("ResourceType")
     interface GeoportalConnect
@@ -59,9 +61,13 @@ public class MainActivity extends AppCompatActivity {
 //            Toast.makeText(this,res.getString(R.string.noInternet),LENGTH_LONG).show();
 //
 //        }
-        ArrayList<Table> tables = new ArrayList<Table>();
         for (int i = 0; i < 10; i++) {
-            Table tmp = new Table("product"+i,null);
+            ArrayList<Note> noteb = new ArrayList<Note>();
+            for (int j = 0; j <10 ; j++) {
+                Note tmp1 = new Note("note"+i+"/"+j,null);
+                noteb.add(tmp1);
+            }
+            Table tmp = new Table("product"+i,null,noteb);
             tables.add(tmp);
         }
         createTablesSpinner(tables);
@@ -71,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
             notes.add(nots);
         }
 
-        NotesAdapter notesAdapter = new NotesAdapter(getBaseContext(),notes);
+        NotesAdapter notesAdapter = new NotesAdapter(getBaseContext(),tables.get(0));
         ListView ar = (ListView) findViewById(R.id.notes);
         ar.setAdapter(notesAdapter);
     }
@@ -120,7 +126,7 @@ public class MainActivity extends AppCompatActivity {
     public void onMyButtonClick(View view)
     {
     }
-    protected void createTablesSpinner(ArrayList<Table> tables)
+    protected void createTablesSpinner(final ArrayList<Table> tables)
     {
         ArrayAdapter<Table> arrayAdapter = new ArrayAdapter<Table>(this,android.R.layout.simple_spinner_item,tables);
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -131,7 +137,12 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 Toast.makeText(getBaseContext(),"position =  " +position,Toast.LENGTH_LONG).show();
-
+                if (position!=0)
+                {
+                    NotesAdapter notesAdapter = new NotesAdapter(getBaseContext(),tables.get(position));
+                    ListView ar = (ListView) findViewById(R.id.notes);
+                    ar.setAdapter(notesAdapter);
+                }
             }
 
             @Override

@@ -7,25 +7,23 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 
-import java.util.ArrayList;
-
 public class NotesAdapter extends BaseAdapter {
     private Context contextm;
-    private ArrayList<Note> notes;
+    private Table table;
 
-    public NotesAdapter(Context contextm, ArrayList<Note> notes) {
+    public NotesAdapter(Context contextm, Table table) {
         this.contextm = contextm;
-        this.notes = notes;
+        this.table = table;
     }
 
     @Override
     public int getCount() {
-        return notes.size();
+        return table.notes.size();
     }
 
     @Override
     public Object getItem(int position) {
-        return notes.get(position);
+        return table.notes.get(position);
     }
 
     @Override
@@ -41,7 +39,7 @@ public class NotesAdapter extends BaseAdapter {
             holder=new ViewHolder(null);
             convertView = LayoutInflater.from(contextm).inflate(R.layout.fieldedit, parent, false);
             holder.button= (Button) convertView.findViewById(R.id.note);
-
+            holder.button.setText(table.notes.get(position).toString());
             convertView.setTag(holder);
         }else{
             holder = (ViewHolder) convertView.getTag();
