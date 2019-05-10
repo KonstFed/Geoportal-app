@@ -7,34 +7,43 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.util.ArrayList;
 
+import okhttp3.ResponseBody;
 import retrofit2.Call;
-import retrofit2.Response;
+import retrofit2.Callback;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.GET;
+import retrofit2.http.Query;
+
+import static android.widget.Toast.LENGTH_LONG;
 
 public class MainActivity extends AppCompatActivity {
-    private String getStructURL;
     private String url;
     private ImageView logo;
-    private boolean isRegged;
+    private JSONArray columns;
     private ArrayList<Table> tables = new ArrayList<Table>();
 
-    RelativeLayout mainLayer;
     @SuppressLint("ResourceType")
     interface GeoportalConnect
     {
-        @GET("/")
-        Call<Response> getStruct();
+        @GET("/dataset/list/")
+        Call<ResponseBody> getStruct(@Query("f") String f, @Query("iDisplayStart") int iDisplayStart, @Query("iDisplayLength") int iDisplayLength, @Query("s_fields") String s_fields, @Query("f_id") int f_id);
     }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,43 +53,72 @@ public class MainActivity extends AppCompatActivity {
         url = res.getString(R.string.urlstruct);
         logo = (ImageView) findViewById(R.id.logo);
         logo.setImageResource(R.drawable.testlogoussr);
-//
-//
-//        if (isOnline(this)) {
-//            String[] ur = new String[1];
-//            ur[0] = url;
-//            ConnectServ serverConnect = new ConnectServ("structure",this);
-//            serverConnect.execute(ur);
-//            Retrofit retrofit = new Retrofit.Builder()
-//                    .baseUrl(getStructURL) // адрес сервера
-//                    .addConverterFactory(GsonConverterFactory.create())
-//                    .build();
-//        }
-//        else
-//        {
-//            Toast.makeText(this,res.getString(R.string.noInternet),LENGTH_LONG).show();
-//
-//        }
+        final Context context = this;
+        if (isOnline(this)) {
+            String[] ur = new String[1];
+            ur[0] = url;
+        } else {
+            Toast.makeText(this, res.getString(R.string.noInternet), LENGTH_LONG).show();
+
+        }
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(url) // адрес сервера
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        GeoportalConnect geoportalConnect = retrofit.create(GeoportalConnect.class);
+        Call<ResponseBody> call = geoportalConnect.getStruct("100",0,100,"JSON",2206);
+        Callback<ResponseBody> callback = new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, retrofit2.Response<ResponseBody> response) {
+                try {
+                    String register = response.body().string(); // получили ответ в виде объекта
+
+                    JSONObject struct = new JSONObject(register);
+                    JSONArray aadata = struct.getJSONArray("aaData");
+                    if (aadata.length() == 1) {
+                        JSONObject tmp = aadata.getJSONObject(0);
+                        String tabledesc = tmp.getString("JSON");
+                        JSONObject struct2 = new JSONObject(tabledesc);
+                        columns = struct2.getJSONArray("columns");
+
+                    }
+
+
+                } catch (JSONException e) {
+                    Log.d("serverResponce", "struct dnt parse");
+
+                }
+                catch (IOException e)
+                {
+                    Log.d("","");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                // обрабатываем ошибку, если она возникла
+                Toast.makeText(context,"HELP,",Toast.LENGTH_LONG).show();
+
+            }
+        };
+        call.enqueue(callback);
+
         for (int i = 0; i < 10; i++) {
             ArrayList<Note> noteb = new ArrayList<Note>();
-            for (int j = 0; j <10 ; j++) {
-                Note tmp1 = new Note("note"+i+"/"+j,null);
+            for (int j = 0; j < 10; j++) {
+                Note tmp1 = new Note("note" + i + "/" + j, null);
                 noteb.add(tmp1);
             }
-            Table tmp = new Table("product"+i,null,noteb);
+            Table tmp = new Table("product" + i, columns, noteb);
             tables.add(tmp);
         }
         createTablesSpinner(tables);
-        ArrayList<Note> notes = new ArrayList<>();
-        for (int i = 0; i < 10; i++) {
-            Note nots = new Note("note"+i,null);
-            notes.add(nots);
-        }
-
-        NotesAdapter notesAdapter = new NotesAdapter(getBaseContext(),tables.get(0));
+        NotesAdapter notesAdapter = new NotesAdapter(getBaseContext(), tables.get(0));
         ListView ar = (ListView) findViewById(R.id.notes);
         ar.setAdapter(notesAdapter);
     }
+
 //    public void drawform(JSONObject struct)
 //    {
 //        mainLayer = (RelativeLayout) findViewById(R.id.mainactivity);
@@ -126,6 +164,10 @@ public class MainActivity extends AppCompatActivity {
     public void onMyButtonClick(View view)
     {
     }
+    public void changeActivity()
+    {
+
+    }
     protected void createTablesSpinner(final ArrayList<Table> tables)
     {
         ArrayAdapter<Table> arrayAdapter = new ArrayAdapter<Table>(this,android.R.layout.simple_spinner_item,tables);
@@ -136,7 +178,7 @@ public class MainActivity extends AppCompatActivity {
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                Toast.makeText(getBaseContext(),"position =  " +position,Toast.LENGTH_LONG).show();
+                Toast.makeText(getBaseContext(),"position =  " +position, LENGTH_LONG).show();
                 if (position!=0)
                 {
                     NotesAdapter notesAdapter = new NotesAdapter(getBaseContext(),tables.get(position));
