@@ -36,7 +36,7 @@ import static android.widget.Toast.LENGTH_LONG;
 public class MainActivity extends AppCompatActivity {
     private String url;
     private ImageView logo;
-    private JSONArray columns;
+    public JSONArray columns;
     private ArrayList<Table> tables = new ArrayList<Table>();
 
     @SuppressLint("ResourceType")
