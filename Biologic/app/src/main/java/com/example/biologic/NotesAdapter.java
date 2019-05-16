@@ -53,7 +53,7 @@ public class NotesAdapter extends BaseAdapter {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(contextm,NoteRedactorActivity.class);
-                String tmp = table.notes.get(position).name+":"+table.struct+":"+table.notes.get(position).data;
+                String tmp = table.notes.get(position).name+"%%/"+table.struct+"%%/"+table.notes.get(position).data;
                 intent.putExtra("Note",tmp);
                 contextm.startActivity(intent);
             }

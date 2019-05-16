@@ -36,9 +36,12 @@ import static android.widget.Toast.LENGTH_LONG;
 public class MainActivity extends AppCompatActivity {
     private String url;
     private ImageView logo;
-    public JSONArray columns;
-    private ArrayList<Table> tables = new ArrayList<Table>();
 
+    private ArrayList<Table> tables = new ArrayList<Table>();
+    public JSONArray columns;
+    public Table table;
+    Retrofit retrofit;
+    Context context;
     @SuppressLint("ResourceType")
     interface GeoportalConnect
     {
@@ -53,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
         url = res.getString(R.string.urlstruct);
         logo = (ImageView) findViewById(R.id.logo);
         logo.setImageResource(R.drawable.testlogoussr);
-        final Context context = this;
+        context = this;
         if (isOnline(this)) {
             String[] ur = new String[1];
             ur[0] = url;
@@ -62,12 +65,18 @@ public class MainActivity extends AppCompatActivity {
 
         }
 
-        Retrofit retrofit = new Retrofit.Builder()
+        retrofit = new Retrofit.Builder()
                 .baseUrl(url) // адрес сервера
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
+        getStructInterface("100",0,100,"JSON",2206);
+
+    }
+    private void getStructInterface(String f,int iDisplayStart,int iDisplayLength,String s_fields,int f_id)
+    {
+
         GeoportalConnect geoportalConnect = retrofit.create(GeoportalConnect.class);
-        Call<ResponseBody> call = geoportalConnect.getStruct("100",0,100,"JSON",2206);
+        Call<ResponseBody> call = geoportalConnect.getStruct(f,iDisplayStart,iDisplayLength,s_fields,f_id);
         Callback<ResponseBody> callback = new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, retrofit2.Response<ResponseBody> response) {
@@ -81,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
                         String tabledesc = tmp.getString("JSON");
                         JSONObject struct2 = new JSONObject(tabledesc);
                         columns = struct2.getJSONArray("columns");
-
+                        makeInterface(columns);
                     }
 
 
@@ -98,76 +107,31 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 // обрабатываем ошибку, если она возникла
-                Toast.makeText(context,"HELP,",Toast.LENGTH_LONG).show();
+                Toast.makeText(context,"Ошибка соедининия, попробуйте снова",Toast.LENGTH_LONG).show();
 
             }
         };
         call.enqueue(callback);
-
+    }
+    private void makeInterface(JSONArray columns)
+    {
         for (int i = 0; i < 10; i++) {
             ArrayList<Note> noteb = new ArrayList<Note>();
             for (int j = 0; j < 10; j++) {
                 Note tmp1 = new Note("note" + i + "/" + j, null);
                 noteb.add(tmp1);
             }
-            Table tmp = new Table("product" + i, columns, noteb);
-            tables.add(tmp);
+            table = new Table("product" + i, columns, noteb);
+            tables.add(table);
         }
         createTablesSpinner(tables);
+
         NotesAdapter notesAdapter = new NotesAdapter(getBaseContext(), tables.get(0));
         ListView ar = (ListView) findViewById(R.id.notes);
         ar.setAdapter(notesAdapter);
     }
 
-//    public void drawform(JSONObject struct)
-//    {
-//        mainLayer = (RelativeLayout) findViewById(R.id.mainactivity);
-////        LayoutInflater inflater = getLayoutInflater();
-//
-//        try {
-//            JSONArray columns = struct.getJSONArray("columns");
-//            TextView f = (TextView) findViewById(R.id.ssa);
-//            for (int i = 0; i < columns.length(); i++) {
-//                JSONObject column = columns.getJSONObject(i);
-//                f.setText(f.getText()+" "+ column.getString("fieldname") + "///////////////////");
-//                if( column.has("widget")) {
-//                    JSONObject widget = column.getJSONObject("widget");
-//                    String widgetname = widget.getString("name");
-//
-//                    switch (widgetname)
-//                    {
-//                        case "edit":
-////                            EditText field = inflater.inflate(R.layout.fieldedit);
-//                            EditText field = new EditText(this);
-//
-//                            RelativeLayout.LayoutParams editviewparams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-//                            field.setLayoutParams(editviewparams);
-//                            mainLayer.addView(field);
-//                            //Создаем поле ввода (нормальное)
-//                            break;
-//                        case "data":
-//                            //типо календарь
-//                            break;
-//                        case "number":
-//                            // число
-//                            break;
-//                    }
-//                }
-//            }
-//
-//
-//        }
-//        catch (JSONException e) {
-//        e.printStackTrace();
-//    }
-//    }
-    public void onMyButtonClick(View view)
-    {
-    }
-    public void changeActivity()
-    {
 
-    }
     protected void createTablesSpinner(final ArrayList<Table> tables)
     {
         ArrayAdapter<Table> arrayAdapter = new ArrayAdapter<Table>(this,android.R.layout.simple_spinner_item,tables);

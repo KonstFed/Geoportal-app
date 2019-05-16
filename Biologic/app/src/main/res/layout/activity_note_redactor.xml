@@ -1,18 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="horizontal"
+    android:orientation="vertical"
     tools:context=".NoteRedactorActivity">
     <TextView
+        android:id="@+id/textName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Note"
         android:textSize="42dp"/>
+
     <ListView
-        android:id="@+id/field"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"></ListView>
-</LinearLayout>
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textName"
+        android:id="@+id/listviewFields"></ListView>
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@+id/textName"
+        android:textSize="17dp"
+        android:text="@string/CancelButton"
+        android:id="@+id/cancelButton"/>
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/acceptButton"
+        android:text="@string/AcceptButton"
+        android:textSize="17dp"
+        android:layout_toEndOf="@+id/cancelButton"/>
+</RelativeLayout>

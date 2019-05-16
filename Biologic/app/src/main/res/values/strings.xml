@@ -3,4 +3,8 @@
     <string name="urlstruct">http://biodiv.isc.irk.ru</string>
     <string name="request">/dataset/list/?f=100&amp;iDisplayStart=0&amp;iDisplayLength=100&amp;s_fields=JSON&amp;f_id=2206</string>
     <string name="noInternet">Отсутствует интернет подключение</string>
+    <string name="CancelButton">Отмена</string>
+    <string name="AcceptButton">Принять</string>
+    <string name="errorSendData">Ошибка на сервере</string>
+    <string name="errorServer">Ошибка отправки на сервер</string>
 </resources>
