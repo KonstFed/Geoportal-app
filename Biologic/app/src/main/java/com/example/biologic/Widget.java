@@ -11,10 +11,12 @@ public abstract class Widget  {
     public Context context;
     public LinearLayout.LayoutParams layoutParams;
     public String propertyName;
+
     public Widget(JSONObject field, Context context, LinearLayout.LayoutParams layoutParams) {
         this.field = field;
         this.context = context;
         this.layoutParams = layoutParams;
+
     }
 
 
@@ -22,5 +24,5 @@ public abstract class Widget  {
 //    public abstract void createWidget(JSONObject field);
     public abstract String getValue();
     public abstract View getView();
-
+    public abstract void addToLayout(LinearLayout layout);
 }

@@ -14,10 +14,22 @@
         android:textSize="42dp"/>
 
     <ListView
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/textName"
         android:id="@+id/listviewFields"></ListView>
+    <ScrollView
+        android:layout_toRightOf="@+id/listviewFields"
+        android:id="@+id/scrollViewNote"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <LinearLayout
+            android:id="@+id/ScrollData"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+        </LinearLayout>
+    </ScrollView>
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

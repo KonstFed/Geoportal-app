@@ -118,14 +118,16 @@ public class NoteRedactorActivity extends AppCompatActivity {
                     String widgetName = widgetProperty.getString("name");
                     LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
                             LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-//                    LinearLayout linearLayout = findViewById(R.id.layout);
+                    LinearLayout scrollLayout = findViewById(R.id.ScrollData);
                     switch (widgetName) {
                         case "edit":
                             W_edit w_edit = new W_edit(tmp, this, layoutParams);
+                            w_edit.addToLayout(scrollLayout);
                             widgets.add(w_edit);
                             break;
                         case "date":
                             W_date w_date = new W_date(tmp, this, layoutParams);
+                            w_date
                             widgets.add(w_date);
                         case "number":
                             W_number w_number = new W_number(tmp, this, layoutParams);
@@ -137,7 +139,6 @@ public class NoteRedactorActivity extends AppCompatActivity {
             WidgetAdapter widgetAdapter = new WidgetAdapter(widgets,this);
             ListView fieldsListView = findViewById(R.id.listviewFields);
             fieldsListView.setAdapter(widgetAdapter);
-
 
 
         } catch (JSONException e) {

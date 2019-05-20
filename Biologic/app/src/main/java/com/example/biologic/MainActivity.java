@@ -142,7 +142,6 @@ public class MainActivity extends AppCompatActivity {
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                Toast.makeText(getBaseContext(),"position =  " +position, LENGTH_LONG).show();
                 if (position!=0)
                 {
                     NotesAdapter notesAdapter = new NotesAdapter(getBaseContext(),tables.get(position));

@@ -32,6 +32,13 @@ public class W_number extends Widget {
     }
 
     @Override
+    public void addToLayout(LinearLayout layout) {
+        LinearLayout lin = new LinearLayout(context);
+        lin.addView(editText);
+        layout.addView(lin);
+    }
+
+    @Override
     public View getView() {
         return editText;
     }
