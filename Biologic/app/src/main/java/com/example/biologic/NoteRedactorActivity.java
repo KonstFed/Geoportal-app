@@ -6,7 +6,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.Toast;
 
 import org.json.JSONArray;
@@ -30,18 +29,22 @@ public class NoteRedactorActivity extends AppCompatActivity {
     JSONArray struct;
     Retrofit retrofit;
     String url ="http://biodiv.isc.irk.ru";
+    private int id;
+    private ArrayList<String> data = new ArrayList<>();
     private ArrayList<Widget> widgets = new ArrayList<>();
     interface DataSend
     {
         @POST("/dataset/add/")
-        Call<ResponseBody> sendData(@Query("f") String f, @Body RequestData document);
+        Call<ResponseBody> sendData(@Query("f") String f, @Body String document);
     }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_note_redactor);
         Intent intent = getIntent();
-        final String[] datas = intent.getStringExtra("Note").split("%%/");
+        String datas = intent.getStringExtra("columns");
+        data = intent.getStringArrayListExtra("data");
+        id = intent.getIntExtra("id",-1);
         Button buttonAccept = findViewById(R.id.acceptButton);
         Button buttonCancel = findViewById(R.id.cancelButton);
 
@@ -64,12 +67,9 @@ public class NoteRedactorActivity extends AppCompatActivity {
 
 
                     result ="{document:"+ result + "}}";
-                    JSONObject request = new JSONObject(result);
-                    RequestData requestData = new RequestData(request);
-                    JSONObject rq = new JSONObject();
 
                     DataSend dataSend = retrofit.create(DataSend.class);
-                    Call<ResponseBody> call = dataSend.sendData("2206",requestData );
+                    Call<ResponseBody> call = dataSend.sendData("2206",result );
                     Callback<ResponseBody> callback = new Callback<ResponseBody>() {
                         @Override
                         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
@@ -79,7 +79,10 @@ public class NoteRedactorActivity extends AppCompatActivity {
                                 if (resp.getString("status").equals("ok"))
                                 {
                                     Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                     getApplicationContext().startActivity(intent);
+                                    Toast.makeText(getApplicationContext(),"URRRAAA",Toast.LENGTH_SHORT).show();
+
                                 }
                                 else
                                 {
@@ -98,7 +101,7 @@ public class NoteRedactorActivity extends AppCompatActivity {
                     call.enqueue(callback);
 
                 }
-                catch (JSONException e){}
+                catch (Exception e){}
             }
         });
         buttonCancel.setOnClickListener(new View.OnClickListener() {
@@ -109,11 +112,12 @@ public class NoteRedactorActivity extends AppCompatActivity {
             }
         });
         try {
-            struct = new JSONArray(datas[1]);
+            struct = new JSONArray(datas);
+            int cnt = 0;
             for (int i = 0; i < struct.length(); i++) {
 
                 JSONObject tmp =struct.getJSONObject(i);
-                if (tmp.has("widget")) {
+                if (tmp.has("widget") && tmp.getString("visible").equals("true")) {
                     JSONObject widgetProperty = tmp.getJSONObject("widget");
                     String widgetName = widgetProperty.getString("name");
                     LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
@@ -121,24 +125,35 @@ public class NoteRedactorActivity extends AppCompatActivity {
                     LinearLayout scrollLayout = findViewById(R.id.ScrollData);
                     switch (widgetName) {
                         case "edit":
-                            W_edit w_edit = new W_edit(tmp, this, layoutParams);
-                            w_edit.addToLayout(scrollLayout);
+                            W_edit w_edit = new W_edit(tmp, this);
+                            if (!data.get(cnt).equals("") && !data.get(cnt).equals("null")) {
+                                w_edit.control(scrollLayout,data.get(cnt),getResources());
+                            }
+                            else{w_edit.control(scrollLayout,getResources());}
                             widgets.add(w_edit);
                             break;
                         case "date":
-                            W_date w_date = new W_date(tmp, this, layoutParams);
-                            w_date
+                            W_date w_date = new W_date(tmp, this);
+                            if (!data.get(cnt).equals("") && !data.get(cnt).equals("null"))
+                            {
+                                w_date.control(scrollLayout,data.get(cnt),getResources());
+                            }
+                            else w_date.control(scrollLayout,getResources());
                             widgets.add(w_date);
+                            break;
                         case "number":
-                            W_number w_number = new W_number(tmp, this, layoutParams);
+                            W_number w_number = new W_number(tmp, this);
+                            if (!data.get(cnt).equals("") && !data.get(cnt).equals("null")) w_number.control(scrollLayout,data.get(cnt),getResources());
+                            else w_number.control(scrollLayout,getResources());
                             widgets.add(w_number);
-
+                            break;
                     }
+                    cnt++;
                 }
             }
-            WidgetAdapter widgetAdapter = new WidgetAdapter(widgets,this);
-            ListView fieldsListView = findViewById(R.id.listviewFields);
-            fieldsListView.setAdapter(widgetAdapter);
+//            WidgetAdapter widgetAdapter = new WidgetAdapter(widgets,this);
+//            ListView fieldsListView = findViewById(R.id.listviewFields);
+//            fieldsListView.setAdapter(widgetAdapter);
 
 
         } catch (JSONException e) {

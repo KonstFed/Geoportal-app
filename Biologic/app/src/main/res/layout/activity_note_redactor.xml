@@ -6,22 +6,21 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context=".NoteRedactorActivity">
-    <TextView
-        android:id="@+id/textName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Note"
-        android:textSize="42dp"/>
+    <!--<TextView-->
+        <!--android:layout_alignParentLeft="true"-->
+        <!--android:id="@+id/textName"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_toLeftOf="@+id/cancelButton"-->
+        <!--android:text="Note"-->
+        <!--android:background="@drawable/customname"-->
+        <!--android:layout_margin="5dp"-->
+        <!--android:textSize="30sp"/>-->
 
-    <ListView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/textName"
-        android:id="@+id/listviewFields"></ListView>
     <ScrollView
-        android:layout_toRightOf="@+id/listviewFields"
+        android:layout_below="@+id/acceptButton"
         android:id="@+id/scrollViewNote"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <LinearLayout
             android:id="@+id/ScrollData"
@@ -33,15 +32,22 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toEndOf="@+id/textName"
-        android:textSize="17dp"
+        android:layout_toLeftOf="@+id/acceptButton"
+        android:textSize="20sp"
         android:text="@string/CancelButton"
+        android:layout_marginLeft="10dp"
+        android:layout_margin = "5dp"
+        android:background="@drawable/custombutton"
         android:id="@+id/cancelButton"/>
     <Button
+        android:gravity="right"
+        android:layout_margin="5dp"
+        android:layout_alignParentRight="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/acceptButton"
         android:text="@string/AcceptButton"
-        android:textSize="17dp"
-        android:layout_toEndOf="@+id/cancelButton"/>
+        android:textSize="20sp"
+        android:background="@drawable/custombutton"
+        />
 </RelativeLayout>
