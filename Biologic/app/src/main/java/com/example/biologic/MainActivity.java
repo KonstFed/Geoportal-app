@@ -57,10 +57,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onClick(View v) {
-            Retrofit retrofit = new Retrofit.Builder()
-                    .baseUrl(url) // адрес сервера
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .build();
+
             String document = "{\"f_id\":\""+ id + "\"}";
             GeoportalConnect geoportalConnect = retrofit.create(GeoportalConnect.class);
             Call<ResponseBody> call = geoportalConnect.deleteData(f,document);
@@ -96,13 +93,13 @@ public class MainActivity extends AppCompatActivity {
 
     public float dp;
     public JSONArray columns;
-    public String f="2206";
+    public String f;
     public String s_fields = "";
     public ArrayList<Widget> widgetsArray = new ArrayList<>();
     public Table table;
     public HashMap<String,String> tables_map;
     public String cookie;
-
+    SharedPreferences myPreferences;
     protected Retrofit retrofit;
     protected Context context;
     @SuppressLint("ResourceType")
@@ -111,9 +108,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        SharedPreferences myPreferences
-                = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+
+            myPreferences    = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         cookie = myPreferences.getString("cookie","");
+        f = myPreferences.getString("f","");
         if (cookie.equals(""))
         {
             Intent i = new Intent(this,Registration.class);
@@ -179,6 +177,7 @@ public class MainActivity extends AppCompatActivity {
                 Intent i = new Intent(getApplicationContext(), NoteRedactorActivity.class);
                 ArrayList<String> ar = new ArrayList<>();
                 i.putExtra("data", ar);
+                i.putExtra("f",f);
                 i.putExtra("id", "");
                 i.putExtra("columns", columns.toString());
                 startActivity(i);
@@ -231,16 +230,29 @@ public class MainActivity extends AppCompatActivity {
                 cookie = data.getStringExtra("cookie");
                 setSettings();
             case 1:
-                f = data.getStringExtra("f");
-                LinearLayout linearLayout = findViewById(R.id.NotesContainer);
-                linearLayout.removeAllViews();
-                drawData(0,100);
+
+                String newf = data.getStringExtra("f");
+
+                if(newf!=f) {
+                    f = newf;
+                    SharedPreferences.Editor myEditor = myPreferences.edit();
+                    myEditor.putString("f", f);
+                    myEditor.commit();
+                    getStructInterface(0, 100);
+                }
+                else
+                {
+                    drawData(0,100);
+                }
         }
     }
 
     public void getStructInterface(int iDisplayStart, int iDisplayLength)
     {
-
+        widgetsArray = new ArrayList<>();
+        LinearLayout lia = findViewById(R.id.NotesContainer);
+        lia.removeAllViews();
+        if (f.equals("")) return;
         GeoportalConnect geoportalConnect = retrofit.create(GeoportalConnect.class);
         Call<ResponseBody> call = geoportalConnect.getStruct("100",iDisplayStart,iDisplayLength,"JSON",f);
         Callback<ResponseBody> callback = new Callback<ResponseBody>() {
@@ -373,11 +385,13 @@ public class MainActivity extends AppCompatActivity {
 
     public void drawData(int iDisplayStart,int iDisplayLength)
     {
+        if(f=="")
+            return;
         LinearLayout lin= findViewById(R.id.NotesContainer);
         lin.removeAllViews();
         GeoportalConnect geoportalConnect = retrofit.create(GeoportalConnect.class);
         Call<ResponseBody> call = geoportalConnect.getData(f,iDisplayStart,iDisplayLength,s_fields);
-        Callback<ResponseBody> callback = new Callback<ResponseBody>() {
+        Callback<ResponseBody> callback2 = new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 try {
@@ -402,9 +416,10 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t){
+                Log.e("net","g");
             }
         };
-        call.enqueue(callback);
+        call.enqueue(callback2);
     }
     public static boolean isOnline(Context context)
     {

@@ -62,12 +62,14 @@ public class SettingActvity extends AppCompatActivity {
                     JSONObject resp = new JSONObject(s);
                     tables_map = new HashMap<>();
                     JSONArray data_tables = resp.getJSONArray("aaData");
+                    int sed;
                     for (int i = 0; i <data_tables.length() ; i++) {
 
                         JSONObject tmp = data_tables.getJSONObject(i);
                         if (tmp.getString("id").equals(old_f))
                         {
                             old_name = tmp.getString("name");
+                            sed = i;
                         }
                         tables_map.put(tmp.getString("name"),tmp.getString("id"));
                     }
@@ -80,7 +82,7 @@ public class SettingActvity extends AppCompatActivity {
 
                     Spinner spinner = findViewById(R.id.spinner);
                     spinner.setAdapter(arrayAdapter);
-                    spinner.setPrompt(old_name);
+//                    spinner.setPrompt();
                     spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                         @Override
                         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {

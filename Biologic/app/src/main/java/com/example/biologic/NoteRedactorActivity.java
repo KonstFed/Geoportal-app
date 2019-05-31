@@ -38,7 +38,7 @@ public class NoteRedactorActivity extends AppCompatActivity {
     String url ="http://biodiv.isc.irk.ru";
     String cookie;
     private String id="";
-    private String f = "2206";
+    private String f ;
     private ArrayList<String> data = new ArrayList<>();
     private ArrayList<Widget> widgets = new ArrayList<>();
 
@@ -57,6 +57,7 @@ public class NoteRedactorActivity extends AppCompatActivity {
         setContentView(R.layout.activity_note_redactor);
         SharedPreferences myPreferences
                 = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        f = getIntent().getStringExtra("f");
         cookie = myPreferences.getString("cookie","");
         if (cookie.equals("")) {
             Intent i = new Intent(this, Registration.class);
@@ -114,10 +115,10 @@ public class NoteRedactorActivity extends AppCompatActivity {
                     result =result + "}";
                     GeoportalConnect geoportalConnect = retrofit.create(GeoportalConnect.class);
                     Call<ResponseBody> call;
-                    if(id.equals(""))  call = geoportalConnect.sendData("2206", result);
-                    else  call = geoportalConnect.updateData("2206", result);
+                    if(id.equals(""))  call = geoportalConnect.sendData(f, result);
+                    else  call = geoportalConnect.updateData(f, result);
 
-                    Callback<ResponseBody> callback = new Callback<ResponseBody>() {
+                    Callback<ResponseBody> callback3 = new Callback<ResponseBody>() {
                         @Override
                         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                             try {
@@ -143,7 +144,7 @@ public class NoteRedactorActivity extends AppCompatActivity {
                         }
                     };
 
-                    call.enqueue(callback);
+                    call.enqueue(callback3);
 
                 }
                 catch (Exception e){
