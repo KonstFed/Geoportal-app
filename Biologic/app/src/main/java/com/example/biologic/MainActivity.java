@@ -2,33 +2,92 @@ package com.example.biologic;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import okhttp3.Interceptor;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import okhttp3.ResponseBody;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
-import retrofit2.http.GET;
-import retrofit2.http.Query;
+
 
 public class MainActivity extends AppCompatActivity {
+    public class OnClickListennerDeleteNote implements View.OnClickListener {
+        String id;
+        String f;
+        String url;
+        MainActivity mainActivity;
+        public OnClickListennerDeleteNote(String id, String f,String url,MainActivity mainActivity) {
+            this.id = id;
+            this.f = f;
+            this.url = url;
+            this.mainActivity = mainActivity;
+        }
+
+        @Override
+        public void onClick(View v) {
+            Retrofit retrofit = new Retrofit.Builder()
+                    .baseUrl(url) // адрес сервера
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build();
+            String document = "{\"f_id\":\""+ id + "\"}";
+            GeoportalConnect geoportalConnect = retrofit.create(GeoportalConnect.class);
+            Call<ResponseBody> call = geoportalConnect.deleteData(f,document);
+            Callback<ResponseBody> callback = new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    try {
+                        String status = response.body().string();
+                        JSONObject resp = new JSONObject(status);
+                        drawData(0,100);
+
+                    }catch (Exception e){
+                        drawData(0,100);
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    drawData(0,100);
+
+                }
+            };
+            call.enqueue(callback);
+
+        }
+    }
+
     private String url;
     private ImageView logo;
     private ArrayList<Table> tables = new ArrayList<Table>();
@@ -41,39 +100,145 @@ public class MainActivity extends AppCompatActivity {
     public String s_fields = "";
     public ArrayList<Widget> widgetsArray = new ArrayList<>();
     public Table table;
+    public HashMap<String,String> tables_map;
+    public String cookie;
 
     protected Retrofit retrofit;
     protected Context context;
     @SuppressLint("ResourceType")
-    interface GeoportalConnect
-    {
-        @GET("/dataset/list/")
-        Call<ResponseBody> getStruct(@Query("f") String f, @Query("iDisplayStart") int iDisplayStart, @Query("iDisplayLength") int iDisplayLength, @Query("s_fields") String s_fields, @Query("f_id") String f_id);
-        @GET("/dataset/list/")
-        Call<ResponseBody> getData(@Query("f") String f, @Query("iDisplayStart") int iDisplayStart, @Query("iDisplayLength") int iDisplayLength, @Query("s_fields") String s_fields);
 
-    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        SharedPreferences myPreferences
+                = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        cookie = myPreferences.getString("cookie","");
+        if (cookie.equals(""))
+        {
+            Intent i = new Intent(this,Registration.class);
+            startActivityForResult(i,2);
+        }
+        else {
+
+            setSettings();
+        }
+
+
+    }
+
+    public void setSettings()
+    {
+        Button menu = findViewById(R.id.menu);
+        menu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(getBaseContext(), SettingActvity.class);
+                i.putExtra("tables_map", tables_map);
+                i.putExtra("f",f);
+                startActivityForResult(i, 1);
+
+            }
+        });
+
         Resources res = this.getResources();
         url = res.getString(R.string.urlstruct);
         context = getApplicationContext();
+        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
+        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+        OkHttpClient.Builder client = new OkHttpClient.Builder()
+                .addInterceptor(interceptor);
+        client.addInterceptor(new Interceptor() {
+            @Override
+            public okhttp3.Response intercept(Chain chain) throws IOException {
+                Request request = chain.request().newBuilder().addHeader("Cookie", cookie).build();
+                return chain.proceed(request);
+            }
+        });
         retrofit = new Retrofit.Builder()
                 .baseUrl(url) // адрес сервера
                 .addConverterFactory(GsonConverterFactory.create())
+                .client(client.build())
                 .build();
         if (isOnline(getApplicationContext())) {
+//            getTables(0, 100);
             getStructInterface(0, 100);
-        }
-        else Toast.makeText(this,R.string.noInternet,Toast.LENGTH_LONG);
+        } else Toast.makeText(this, R.string.noInternet, Toast.LENGTH_LONG);
         dp = getResources().getDisplayMetrics().density;
         dx = getResources().getDisplayMetrics().heightPixels;
         dy = getResources().getDisplayMetrics().widthPixels;
+        ImageButton new_note_button = findViewById(R.id.newNoteButton);
+        ViewGroup.LayoutParams para = new_note_button.getLayoutParams();
+        TextView text = findViewById(R.id.nameUser);
+        para.height = (int) dx / 13;
+        para.width = para.height;
+        new_note_button.setLayoutParams(para);
+        new_note_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(getApplicationContext(), NoteRedactorActivity.class);
+                ArrayList<String> ar = new ArrayList<>();
+                i.putExtra("data", ar);
+                i.putExtra("id", "");
+                i.putExtra("columns", columns.toString());
+                startActivity(i);
 
+
+            }
+        });
+
+        Log.e("dsa", "dsada");
     }
-    private void getStructInterface(int iDisplayStart,int iDisplayLength)
+
+    public void getTables(int iDisplayStart,int iDisplayLength)
+    {
+        GeoportalConnect geoportalConnect = retrofit.create(GeoportalConnect.class);
+        Call<ResponseBody> call = geoportalConnect.getData(Integer.toString(100),iDisplayStart,iDisplayLength,"title");
+        Callback<ResponseBody> callback = new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response)
+            {
+                try
+                {
+                    String s = response.body().string();
+                    JSONObject resp = new JSONObject(s);
+                    tables_map = new HashMap<>();
+                    JSONArray data_tables = resp.getJSONArray("aaData");
+                    for (int i = 0; i <data_tables.length() ; i++) {
+
+                        JSONObject tmp = data_tables.getJSONObject(i);
+                        tables_map.put(tmp.getString("name"),tmp.getString("id"));
+                        if (i==0) f = tmp.getString("id");
+                    }
+                    Log.e("e","dsada");
+                }catch (Exception e){}
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Log.e("e","dsada");
+
+            }
+        };
+        call.enqueue(callback);
+        }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+//        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode)
+        {
+            case 2:
+                cookie = data.getStringExtra("cookie");
+                setSettings();
+            case 1:
+                f = data.getStringExtra("f");
+                LinearLayout linearLayout = findViewById(R.id.NotesContainer);
+                linearLayout.removeAllViews();
+                drawData(0,100);
+        }
+    }
+
+    public void getStructInterface(int iDisplayStart, int iDisplayLength)
     {
 
         GeoportalConnect geoportalConnect = retrofit.create(GeoportalConnect.class);
@@ -104,17 +269,19 @@ public class MainActivity extends AppCompatActivity {
                                     String widgetName = widgetProperty.getString("name");
                                     switch (widgetName) {
                                         case "edit":
-                                            widget = new W_edit(tmp1, getApplicationContext());
+                                            widget = new W_edit(tmp1, getApplicationContext(), getResources());
 
                                             break;
                                         case "date":
-                                            widget = new W_date(tmp1, getApplicationContext());
+                                            widget = new W_date(tmp1, getApplicationContext(),getResources());
 
                                             break;
                                         case "number":
-                                            widget = new W_number(tmp1, getApplicationContext());
+                                            widget = new W_number(tmp1, getApplicationContext(),getResources());
 
                                             break;
+                                        case "point":
+                                            widget = new W_point(tmp1,getApplicationContext(),getResources(),(LocationManager) getSystemService(Context.LOCATION_SERVICE));
                                     }
                                     widgetsArray.add(widget);
                                 }
@@ -122,7 +289,7 @@ public class MainActivity extends AppCompatActivity {
                                 {
                                     if (tmp1.getString("fieldname").equals("id"))
                                     {
-                                        Widget w_id = new W_number(tmp1,getApplicationContext());
+                                        Widget w_id = new W_number(tmp1,getApplicationContext(),getResources());
                                         widgetsArray.add(w_id);
                                     }
                                 }
@@ -164,13 +331,13 @@ public class MainActivity extends AppCompatActivity {
         Resources res = getResources();
         lin.setBackground(res.getDrawable(R.drawable.customborder));
         ArrayList<String> dataString = new ArrayList<>();
-        int id =-1;
+        String id="";
         for (int i = 0; i < widgetsArray.size(); i++) {
 
             Widget current = widgetsArray.get(i);
             if (current.propertyName.equals("id"))
             {
-                id =Integer.parseInt(map.get(current.propertyName));
+                id =map.get(current.propertyName);
             }
             else
             {
@@ -192,7 +359,7 @@ public class MainActivity extends AppCompatActivity {
 
         ImageButton deleteButton = new ImageButton(getBaseContext());
         deleteButton.setBackground(getResources().getDrawable(R.drawable.deletebutton));
-        OnClickListennerDeleteNote onclick = new OnClickListennerDeleteNote();
+        OnClickListennerDeleteNote onclick = new OnClickListennerDeleteNote(id,f,getResources().getString(R.string.urlstruct),this);
         LinearLayout.LayoutParams layoutParamsDelete = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         layoutParamsDelete.width = (int) dx/13;
         layoutParamsDelete.height =(int) dx/13;
@@ -203,9 +370,11 @@ public class MainActivity extends AppCompatActivity {
         lin.addView(linButtons);
         scrollLayout.addView(lin);
     }
+
     public void drawData(int iDisplayStart,int iDisplayLength)
     {
-
+        LinearLayout lin= findViewById(R.id.NotesContainer);
+        lin.removeAllViews();
         GeoportalConnect geoportalConnect = retrofit.create(GeoportalConnect.class);
         Call<ResponseBody> call = geoportalConnect.getData(f,iDisplayStart,iDisplayLength,s_fields);
         Callback<ResponseBody> callback = new Callback<ResponseBody>() {
@@ -226,7 +395,9 @@ public class MainActivity extends AppCompatActivity {
                         createNotes(map);
                     }
 
-                }catch (Exception e){}
+                }catch (Exception e){
+                    Log.e("","sad");
+                }
             }
 
             @Override

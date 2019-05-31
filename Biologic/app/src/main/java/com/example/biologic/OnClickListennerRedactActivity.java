@@ -9,11 +9,11 @@ import org.json.JSONArray;
 import java.util.ArrayList;
 
 public class OnClickListennerRedactActivity implements View.OnClickListener {
-    int id;
+    String id;
     ArrayList<String> data;
     JSONArray columns;
     Context context;
-    public OnClickListennerRedactActivity(int id, ArrayList<String> data, JSONArray columns, Context context) {
+    public OnClickListennerRedactActivity(String id, ArrayList<String> data, JSONArray columns, Context context) {
         this.id = id;
         this.data = data;
         this.columns = columns;

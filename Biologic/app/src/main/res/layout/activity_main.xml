@@ -12,17 +12,26 @@
         android:layout_height="wrap_content"
         android:id="@+id/nameUser"
         android:layout_marginTop="5dp"
+        android:layout_margin="5dp"
         android:textSize="20sp"
         android:background="@drawable/customname"
         android:layout_alignParentLeft="true"
+        android:layout_toStartOf="@+id/newNoteButton"
+        android:text=""/>
+    <ImageButton
+        android:id="@+id/newNoteButton"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
         android:layout_toStartOf="@+id/menu"
-        android:text="None"/>
+        android:background="@drawable/new_note_button"
+        android:layout_marginLeft="10dp"
+        android:layout_margin="5dp"/>
     <Button
-        android:layout_marginLeft="20dp"
+        android:layout_marginLeft="10dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="20sp"
-        android:text="Menu"
+        android:text="Настройки"
         android:layout_marginTop="5dp"
         android:layout_marginRight="5dp"
         android:layout_alignParentRight="true"
